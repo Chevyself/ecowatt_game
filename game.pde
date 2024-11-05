@@ -12,6 +12,11 @@ void setup() {
 
   // Framerate to 30
   frameRate(30);
+
+  // Textures
+  tiles = loadImage("tiles.png");
+  tiles.loadPixels();
+  reloadTextures();
 }
 
 void draw() {
@@ -19,6 +24,8 @@ void draw() {
   background(255);
 
   // -- Game logic --
+  drawInCell(0, 0, getTilePixels(0, 0));
+  drawInCell(0, 1, getTilePixels(0, 0));
 
   // -- Space for debugging --
   if (debug) {
