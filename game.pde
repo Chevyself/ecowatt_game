@@ -3,11 +3,9 @@
 Epic game to learn to use electricity efficiently!!
 */
 
-boolean debug = true;
-
 void setup() {
   // Basic
-  fullScreen();
+  fullScreen(P2D);
   // size(800, 800); // To test different resolutions
 
   // Framerate to 30
@@ -24,11 +22,6 @@ void draw() {
   background(255);
 
   // -- Game logic --
-  drawInCell(0, 0, getTilePixels(0, 0));
-  drawInCell(0, 1, getTilePixels(0, 0));
 
-  // -- Space for debugging --
-  if (debug) {
-    debugGrid();
-  }
+  renderDebug();
 }
