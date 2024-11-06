@@ -64,6 +64,11 @@ void loadExtraTextures() {
   extras.put("wall90", rotate90(wall));
   extras.put("wall180", rotate90(extras.get("wall90")));
   extras.put("wall270", rotate90(extras.get("wall180")));
+
+  int[] corner = getTilePixels(2, 0);
+  extras.put("corner90", rotate90(corner));
+  extras.put("corner180", rotate90(extras.get("corner90")));
+  extras.put("corner270", rotate90(extras.get("corner180")));
 }
 
 int[] getTilePixels(IntVector2D position) {
@@ -77,10 +82,6 @@ int[] getTilePixels(int x, int y) {
   return getTilePixels(new IntVector2D(realX, realY));
 }
 
-int[] fallback() {
-  return getTilePixels(0, 0);
-}
-
 int[] rotate90(int[] pixels) {
   int[] rotated = new int[pixels.length];
   for (int i = 0; i < GRID_SIZE; i++) {
@@ -89,4 +90,14 @@ int[] rotate90(int[] pixels) {
     }
   }
   return rotated;
+}
+
+// Generic types
+
+int[] fallback() {
+  return getTilePixels(0, 0);
+}
+
+int[] grass() {
+  return getTilePixels(3, 0);
 }
