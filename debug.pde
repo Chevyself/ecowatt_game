@@ -5,6 +5,9 @@ boolean showTextures = false;
 void renderDebug() {
   if (!debug) return;
   debugGrid();
+  // Coords under the crosshair in the center of the screen
+  fill(0);
+  text("Camera: " + cameraX + ", " + cameraY, 5, 15);
   if (!showTextures) return;
   debugTextures();
 }
@@ -31,6 +34,7 @@ void debugGrid() {
   });
 }
 
+/** Draws all the textures in the grid, also shows the name of the extra textures */
 void debugTextures() {
   SimpleAtomic<Integer> tX = new SimpleAtomic<>(0);
   SimpleAtomic<Integer> tY = new SimpleAtomic<>(0);

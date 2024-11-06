@@ -22,6 +22,7 @@ void draw() {
   background(255);
 
   // -- Game logic --
+  drawCrossHair();
 
   renderDebug();
 }
