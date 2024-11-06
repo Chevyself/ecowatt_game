@@ -1,5 +1,5 @@
 
-int CAMERA_SPEED = 8;
+int CAMERA_SPEED = 12;
 
 // Basically, the camera, is how far we've gone from
 // the origin

@@ -4,7 +4,7 @@ boolean showTextures = false;
 
 void renderDebug() {
   if (!debug) return;
-  debugGrid();
+  drawVisibleBorders();
   // Coords under the crosshair in the center of the screen
   fill(0);
   text("Camera: " + cameraX + ", " + cameraY, 5, 15);
