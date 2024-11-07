@@ -61,21 +61,29 @@ class Grid {
         }
 
         CellData cell = cells.get(cellKey);
-        if (cell.texture != null && cell.texture.length > 0) {
-          // Create a temporary PImage to display the texture
-          PImage temp = createImage(GRID_SIZE, GRID_SIZE, ARGB);
-          temp.loadPixels();
+        drawCellTexture(cell, screenX, screenY);
+      }
+    }
+  }
 
-          // Copy the texture data directly to the image
-          for (int i = 0; i < cell.texture.length; i++) {
-            temp.pixels[i] = cell.texture[i];
-          }
-          temp.updatePixels();
+  void drawCellTexture(CellData cell, float screenX, float screenY) {
+    if (cell.texture == null || cell.texture.length <= 0) {
+      return;
+    }
 
-          // Draw the image
-          noStroke();
-          image(temp, screenX, screenY);
+    noStroke();
+    for (int i = 0; i < GRID_SIZE; i++) {
+      for (int j = 0; j < GRID_SIZE; j++) {
+        int index = i + j * GRID_SIZE;
+        if (index >= cell.texture.length) {
+          break;
         }
+        int pixel = cell.texture[index];
+        if (pixel == 0) {
+          continue;
+        }
+        fill(pixel);
+        rect(screenX + i, screenY + j, 1, 1);
       }
     }
   }
