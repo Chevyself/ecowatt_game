@@ -1,53 +1,81 @@
+// An infinite 2D grid system that moves around based on the camera's position
 
-// Grid manager
-int GRID_SIZE = 128; // The size of cells in the grid X and Y in pixels
+// Camera is declared in camera.pde
+// vars:
+//  cameraX
+//  cameraY
 
-/** Repeats the given action for each cell in the grid */
-void onEachCell(BiConsumer<Integer, Integer> consumer) {
-  for (int x = 0; x < width; x += GRID_SIZE) {
-    for (int y = 0; y < height; y += GRID_SIZE) {
-      consumer.accept(x, y);
-    }
+int GRID_SIZE = 128;
+
+class Grid {
+  float cellSize = GRID_SIZE;  // Size of each grid cell
+  color gridColor;      // Color of grid lines
+  float opacity = 128;  // Grid line opacity
+
+  Grid() {
+    gridColor = color(200, 200, 200, opacity);
   }
-}
 
-/** Draws the given pixels in the cell at the given position */
-void drawInCell(int x, int y, int[] pixels) {
-  int finalX = x * GRID_SIZE - cameraX;
-  int finalY = y * GRID_SIZE - cameraY;
-  for (int i = 0; i < GRID_SIZE; i++) {
-    for (int j = 0; j < GRID_SIZE; j++) {
-      int index = i + j * GRID_SIZE;
-      int colour = pixels[index];
-      if (colour != 0) {
-        set(finalX + i, finalY + j, colour);
+  void display() {
+    // Calculate grid boundaries based on screen size
+    float startX = cameraX - width/2;
+    float startY = cameraY - height/2;
+    float endX = cameraX + width/2;
+    float endY = cameraY + height/2;
+
+    // Align to grid
+    float alignedStartX = floor(startX/cellSize) * cellSize;
+    float alignedStartY = floor(startY/cellSize) * cellSize;
+
+    stroke(gridColor);
+    strokeWeight(1);
+
+    // Draw vertical lines
+    for (float x = alignedStartX; x <= endX; x += cellSize) {
+      float screenX = x - cameraX + width/2;
+      line(screenX, 0, screenX, height);
+    }
+
+    // Draw horizontal lines
+    for (float y = alignedStartY; y <= endY; y += cellSize) {
+      float screenY = y - cameraY + height/2;
+      line(0, screenY, width, screenY);
+    }
+
+    // Draw the coordinates of each cell
+    for (float x = alignedStartX; x <= endX; x += cellSize) {
+      for (float y = alignedStartY; y <= endY; y += cellSize) {
+        float screenX = x - cameraX + width/2;
+        float screenY = y - cameraY + height/2;
+        fill(0);
+        text(floor(x/cellSize) + ", " + floor(y/cellSize), screenX + 5, screenY + 15);
       }
     }
   }
-}
 
-/** Draws the borders around the visible grid cells based on the current camera position */
-void drawVisibleBorders() {
-  // Calculate the starting positions based on the camera's current position
-  int startX = (cameraX / GRID_SIZE) * GRID_SIZE;
-  int startY = (cameraY / GRID_SIZE) * GRID_SIZE;
+  // Optional: Method to change grid cell size
+  void setCellSize(float size) {
+    cellSize = size;
+  }
 
-  // Calculate how many cells fit in the width and height based on GRID_SIZE
-  int cols = (width + GRID_SIZE - 1) / GRID_SIZE;  // Number of visible columns (horizontal cells)
-  int rows = (height + GRID_SIZE - 1) / GRID_SIZE; // Number of visible rows (vertical cells)
+  // Optional: Method to change grid color
+  void setColor(color c) {
+    gridColor = c;
+  }
 
-  // Loop through each visible cell and draw a border around it
-  for (int i = 0; i < cols; i++) {
-    for (int j = 0; j < rows; j++) {
-      // Calculate the final position of the cell in the screen coordinates
-      int cellX = startX + i * GRID_SIZE - cameraX;
-      int cellY = startY + j * GRID_SIZE - cameraY;
+  // Optional: Get world coordinates from screen coordinates
+  PVector screenToWorld(float screenX, float screenY) {
+    float worldX = screenX - width/2 + cameraX;
+    float worldY = screenY - height/2 + cameraY;
+    return new PVector(worldX, worldY);
+  }
 
-      // Draw the border around the visible cell
-      noFill();
-      stroke(255, 0, 0); // Red color for the borders (can be customized)
-      strokeWeight(2); // Set border thickness
-      rect(cellX, cellY, GRID_SIZE, GRID_SIZE); // Draw the rectangle for the cell border
-    }
+  // Optional: Get screen coordinates from world coordinates
+  PVector worldToScreen(float worldX, float worldY) {
+    float screenX = worldX - cameraX + width/2;
+    float screenY = worldY - cameraY + height/2;
+    return new PVector(screenX, screenY);
   }
 }
+
+Grid grid = new Grid();

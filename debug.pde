@@ -4,12 +4,12 @@ boolean showTextures = false;
 
 void renderDebug() {
   if (!debug) return;
-  drawVisibleBorders();
+  grid.display();
   // Coords under the crosshair in the center of the screen
   fill(0);
   text("Camera: " + cameraX + ", " + cameraY, 5, 15);
   if (!showTextures) return;
-  debugTextures();
+  //debugTextures();
 }
 
 /** Draws the outline of each cell in the grid */
@@ -21,7 +21,7 @@ void debugGrid() {
       noFill();
       rect(x, y, GRID_SIZE, GRID_SIZE);
     }
-  }*/
+  }
   onEachCell((x, y) -> {
     stroke(0);
     noFill();
@@ -31,10 +31,10 @@ void debugGrid() {
     int visibleX = x / GRID_SIZE;
     int visibleY = y / GRID_SIZE;
     text(visibleX + ", " + visibleY, x + 5, y + 15);
-  });
+  });*/
 }
 
-/** Draws all the textures in the grid, also shows the name of the extra textures */
+/** Draws all the textures in the grid, also shows the name of the extra textures
 void debugTextures() {
   SimpleAtomic<Integer> tX = new SimpleAtomic<>(0);
   SimpleAtomic<Integer> tY = new SimpleAtomic<>(0);
@@ -58,4 +58,4 @@ void debugTextures() {
       tY.set(tY.get() + 1);
     }
   });
-}
+}*/
