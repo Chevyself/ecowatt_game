@@ -4,12 +4,11 @@ boolean showTextures = false;
 
 void renderDebug() {
   if (!debug) return;
-  grid.display();
-  // Coords under the crosshair in the center of the screen
+  grid.debugDisplay();
   fill(0);
   text("Camera: " + cameraX + ", " + cameraY, 5, 15);
   if (!showTextures) return;
-  //debugTextures();
+  debugTextures();
 }
 
 /** Draws the outline of each cell in the grid */
@@ -34,13 +33,14 @@ void debugGrid() {
   });*/
 }
 
-/** Draws all the textures in the grid, also shows the name of the extra textures
+/** Draws all the textures in the grid, also shows the name of the extra textures */
 void debugTextures() {
   SimpleAtomic<Integer> tX = new SimpleAtomic<>(0);
   SimpleAtomic<Integer> tY = new SimpleAtomic<>(0);
 
   tilePixels.forEach((position, pixels) -> {
-    drawInCell(tX.get(), tY.get(), pixels);
+    // drawInCell(tX.get(), tY.get(), pixels);
+    grid.getOrCreateCellData(tX.get(), tY.get()).texture = pixels;
     tX.set(tX.get() + 1);
     if (tX.get() >= width / GRID_SIZE) {
       tX.set(0);
@@ -48,8 +48,7 @@ void debugTextures() {
     }
   });
   extras.forEach((name, pixels) -> {
-    drawInCell(tX.get(), tY.get(), pixels);
-    // Add name of extra
+    grid.getOrCreateCellData(tX.get(), tY.get()).texture = pixels;
     fill(255, 0, 0);
     text(name, tX.get() * GRID_SIZE + 5, tY.get() * GRID_SIZE + 15);
     tX.set(tX.get() + 1);
@@ -58,4 +57,4 @@ void debugTextures() {
       tY.set(tY.get() + 1);
     }
   });
-}*/
+}
