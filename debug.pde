@@ -1,6 +1,7 @@
 
 boolean debug = false;
 boolean showTextures = false;
+boolean texturesShow = false;
 
 void renderDebug() {
   if (!debug) return;
@@ -8,7 +9,10 @@ void renderDebug() {
   fill(0);
   text("Camera: " + cameraX + ", " + cameraY, 5, 15);
   if (!showTextures) return;
-  debugTextures();
+  if (!texturesShow) {
+    texturesShow = true;
+    debugTextures();
+  }
 }
 
 /** Draws the outline of each cell in the grid */

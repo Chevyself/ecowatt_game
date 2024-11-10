@@ -3,6 +3,8 @@
 Epic game to learn to use electricity efficiently!!
 */
 
+Test test = new Test();
+
 void setup() {
   // Basic
   fullScreen(P2D);
@@ -15,6 +17,7 @@ void setup() {
   tiles = loadImage("tiles.png");
   tiles.loadPixels();
   reloadTextures();
+  setupCamera();
 }
 
 void draw() {
@@ -23,7 +26,10 @@ void draw() {
 
   // -- Game logic --
   grid.display();
-  drawCrossHair();
+  keybindsFrame();
+  drawCharacter();
+
+  test.hello();
 
   renderDebug();
 }

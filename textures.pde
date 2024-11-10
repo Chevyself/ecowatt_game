@@ -9,7 +9,7 @@ float SCALE = (float) GRID_SIZE / TILE_SIZE;
 PImage tiles;
 
 // Preloaded pixels scaled to match the grid
-HashMap<IntVector2D, int[]> tilePixels = new HashMap<>();
+HashMap<PVector, int[]> tilePixels = new HashMap<>();
 // Some extra textures
 HashMap<String, int[]> extras = new HashMap<>();
 
@@ -52,7 +52,7 @@ void computeTextures() {
       if (computed.length <= 0) {
         continue;
       }
-      tilePixels.put(new IntVector2D(x, y), computed);
+      tilePixels.put(new PVector(x, y), computed);
       println("Texture loaded at " + x + ", " + y);
     }
   }
@@ -62,24 +62,40 @@ void loadExtraTextures() {
   // Wall is oriented down, so rotate it 90 degrees 3 times to complete
   int[] wall = getTilePixels(1, 0);
   extras.put("wall90", rotate90(wall));
-  extras.put("wall180", rotate90(extras.get("wall90")));
-  extras.put("wall270", rotate90(extras.get("wall180")));
+  extras.put("wall180", rotate90(getExtraTexture("wall90")));
+  extras.put("wall270", rotate90(getExtraTexture("wall180")));
 
   int[] corner = getTilePixels(2, 0);
   extras.put("corner90", rotate90(corner));
-  extras.put("corner180", rotate90(extras.get("corner90")));
-  extras.put("corner270", rotate90(extras.get("corner180")));
+  extras.put("corner180", rotate90(getExtraTexture("corner90")));
+  extras.put("corner270", rotate90(getExtraTexture("corner180")));
+
+  // Player back left up, flips right
+  extras.put("playerBackLeftUp", verticalFlip(playerBackRightUp()));
+  extras.put("playerFrontLeftUp", verticalFlip(playerFrontRightUp()));
+
+  // Left mirror
+  extras.put("playerLeft", verticalFlip(playerRight()));
+  extras.put("playerLeftWalk1", verticalFlip(playerRightWalk1()));
+  extras.put("playerLeftWalk2", verticalFlip(playerRightWalk2()));
 }
 
-int[] getTilePixels(IntVector2D position) {
+int[] getTilePixels(PVector position) {
   int[] value = tilePixels.get(position);
+  println("Tile at " + position.x + ", " + position.y + " is " + (value != null ? "loaded" : "not loaded"));
   return value != null ? value : fallback();
 }
 
 int[] getTilePixels(int x, int y) {
   int realX = x * TILE_SIZE;
   int realY = y * TILE_SIZE;
-  return getTilePixels(new IntVector2D(realX, realY));
+  return getTilePixels(new PVector(realX, realY));
+}
+
+int[] getExtraTexture(String name) {
+  int[] value = extras.get(name);
+  println("Extra texture " + name + " is " + (value != null ? "loaded" : "not loaded"));
+  return value != null ? value : fallback();
 }
 
 int[] rotate90(int[] pixels) {
@@ -92,6 +108,26 @@ int[] rotate90(int[] pixels) {
   return rotated;
 }
 
+int[] horizontalFlip(int[] pixels) {
+  int[] flipped = new int[pixels.length];
+  for (int i = 0; i < GRID_SIZE; i++) {
+    for (int j = 0; j < GRID_SIZE; j++) {
+      flipped[i + (GRID_SIZE - j - 1) * GRID_SIZE] = pixels[i + j * GRID_SIZE];
+    }
+  }
+  return flipped;
+}
+
+int[] verticalFlip(int[] pixels) {
+  int[] flipped = new int[pixels.length];
+  for (int i = 0; i < GRID_SIZE; i++) {
+    for (int j = 0; j < GRID_SIZE; j++) {
+      flipped[(GRID_SIZE - i - 1) + j * GRID_SIZE] = pixels[i + j * GRID_SIZE];
+    }
+  }
+  return flipped;
+}
+
 // Generic types
 
 int[] fallback() {
@@ -100,4 +136,98 @@ int[] fallback() {
 
 int[] grass() {
   return getTilePixels(3, 0);
+}
+
+// Player
+
+int[] playerFrontIdle() {
+  return getTilePixels(0, 1);
+}
+
+int[] playerBackIdle() {
+  return getTilePixels(0, 2);
+}
+
+int[] playerBackRightUp() {
+  return getTilePixels(0, 3);
+}
+
+int[] playerBack() {
+  return getTilePixels(0, 4);
+}
+
+int[] playerBackLeftUp() {
+  return getExtraTexture("playerBackLeftUp");
+}
+
+int[] playerFrontRightUp() {
+  return getTilePixels(0, 5);
+}
+
+int[] playerFront() {
+  return getTilePixels(0, 6);
+}
+
+int[] playerFrontLeftUp() {
+  return getExtraTexture("playerFrontLeftUp");
+}
+
+int[] playerRight() {
+  return getTilePixels(1, 1);
+}
+
+int[] playerRightWalk1() {
+  return getTilePixels(1, 2);
+}
+
+int[] playerRightWalk2() {
+  return getTilePixels(1, 3);
+}
+
+int[] playerLeft() {
+  return getExtraTexture("playerLeft");
+}
+
+int[] playerLeftWalk1() {
+  return getExtraTexture("playerLeftWalk1");
+}
+
+int[] playerLeftWalk2() {
+  return getExtraTexture("playerLeftWalk2");
+}
+
+int[][] frontFrames() {
+  return new int[][] {
+    playerFrontLeftUp(),
+    playerFront(),
+    playerFrontRightUp(),
+    playerFront()
+  };
+}
+
+int[][] backFrames() {
+  return new int[][] {
+    playerBackLeftUp(),
+    playerBack(),
+    playerBackRightUp(),
+    playerBack()
+  };
+}
+
+int[][] leftFrames() {
+  return new int[][] {
+    playerLeftWalk1(),
+    playerLeft(),
+    playerLeftWalk2(),
+    playerLeft(),
+  };
+}
+
+int[][] rightFrames() {
+  return new int[][] {
+    playerRightWalk1(),
+    playerRight(),
+    playerRightWalk2(),
+    playerRight(),
+  };
 }
