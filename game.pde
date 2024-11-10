@@ -3,8 +3,6 @@
 Epic game to learn to use electricity efficiently!!
 */
 
-Test test = new Test();
-
 void setup() {
   // Basic
   fullScreen(P2D);
@@ -12,6 +10,9 @@ void setup() {
 
   // Framerate to 30
   frameRate(30);
+
+  // Setup serial
+  setupSerialCommunication();
 
   // Textures
   tiles = loadImage("tiles.png");

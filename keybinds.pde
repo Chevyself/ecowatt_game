@@ -2,7 +2,7 @@ enum Direction {
   UP, DOWN, LEFT, RIGHT
 };
 
-HashMap<Character, Boolean> keysPressed = new HashMap<>();
+HashMap<Character, Integer> keysPressed = new HashMap<>();
 Direction direction = Direction.DOWN;
 boolean moving = false;
 
@@ -13,7 +13,7 @@ void keyPressed() {
   } else if (key == '5') {
     showTextures = !showTextures;
   }
-  keysPressed.put(key, true);
+  keysPressed.put(key, MAX_CAMERA_SPEED);
 }
 
 boolean isKeyPressed(char key) {
@@ -22,12 +22,14 @@ boolean isKeyPressed(char key) {
 
 // This method is properly named as keyReleased
 void keyReleased() {
-  keysPressed.put(key, false);
+  // keysPressed.put(key, false);
   // See if any movement key is still pressed
-  moving = isKeyPressed('w') || isKeyPressed('a') || isKeyPressed('s') || isKeyPressed('d');
+  keysPressed.remove(key);
+  moving = keysPressed.values().stream().anyMatch(v -> v > 0);
 }
 
 void keybindsFrame() {
+  /*
   if (Boolean.TRUE.equals(keysPressed.get('w'))) {
     cameraY -= CAMERA_SPEED;
     direction = Direction.UP;
@@ -51,5 +53,22 @@ void keybindsFrame() {
     direction = Direction.RIGHT;
     moving = true;
     return;
+  }*/
+  if (keysPressed.containsKey('w')) {
+    cameraY -= MAX_CAMERA_SPEED;
+    direction = Direction.UP;
+    moving = true;
+  } else if (keysPressed.containsKey('a')) {
+    cameraX -= MAX_CAMERA_SPEED;
+    direction = Direction.LEFT;
+    moving = true;
+  } else if (keysPressed.containsKey('s')) {
+    cameraY += MAX_CAMERA_SPEED;
+    direction = Direction.DOWN;
+    moving = true;
+  } else if (keysPressed.containsKey('d')) {
+    cameraX += MAX_CAMERA_SPEED;
+    direction = Direction.RIGHT;
+    moving = true;
   }
 }

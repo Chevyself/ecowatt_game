@@ -1,5 +1,6 @@
 
-int CAMERA_SPEED = 12;
+// int CAMERA_SPEED = 12;
+int MAX_CAMERA_SPEED = 12;
 int MAX_ANIMATION_FRAME = 5; // Keep the animation for at least 5 frames
 
 // Basically, the camera, is how far we've gone from
