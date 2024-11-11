@@ -19,7 +19,7 @@ void setupSerialCommunication() {
   // List all the available serial ports
   println(Serial.list());
   // Open the port
-  serial = new Serial(this, Serial.list()[0], 9600);
+  serial = new Serial(this, Serial.list()[4], 9600);
 
   // Init mappings
   buttonMapping.put(0, 'z');

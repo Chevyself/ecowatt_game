@@ -83,7 +83,7 @@ void drawCharacter() {
   } else {
     lastTexture = textures;
   }
-  println("Textures: " + textures.length);
+  //println("Textures: " + textures.length);
   if (textures.length == 0) return;
   // Draw
   int x = width / 2 - GRID_SIZE / 2;
