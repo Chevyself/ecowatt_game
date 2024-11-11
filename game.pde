@@ -30,7 +30,5 @@ void draw() {
   keybindsFrame();
   drawCharacter();
 
-  test.hello();
-
   renderDebug();
 }

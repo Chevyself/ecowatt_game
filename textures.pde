@@ -82,7 +82,7 @@ void loadExtraTextures() {
 
 int[] getTilePixels(PVector position) {
   int[] value = tilePixels.get(position);
-  println("Tile at " + position.x + ", " + position.y + " is " + (value != null ? "loaded" : "not loaded"));
+  // println("Tile at " + position.x + ", " + position.y + " is " + (value != null ? "loaded" : "not loaded"));
   return value != null ? value : fallback();
 }
 
@@ -94,7 +94,7 @@ int[] getTilePixels(int x, int y) {
 
 int[] getExtraTexture(String name) {
   int[] value = extras.get(name);
-  println("Extra texture " + name + " is " + (value != null ? "loaded" : "not loaded"));
+  // println("Extra texture " + name + " is " + (value != null ? "loaded" : "not loaded"));
   return value != null ? value : fallback();
 }
 

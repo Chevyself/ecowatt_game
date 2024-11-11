@@ -16,6 +16,19 @@ void keyPressed() {
   keysPressed.put(key, MAX_CAMERA_SPEED);
 }
 
+void keyPressed(char key) {
+  keysPressed.put(key, MAX_CAMERA_SPEED);
+}
+
+void keyReleased(char key) {
+  keysPressed.remove(key);
+  checkIsMoving();
+}
+
+void checkIsMoving() {
+  moving = keysPressed.values().stream().anyMatch(v -> v > 0);
+}
+
 boolean isKeyPressed(char key) {
   return Boolean.TRUE.equals(keysPressed.get(key));
 }
@@ -55,19 +68,19 @@ void keybindsFrame() {
     return;
   }*/
   if (keysPressed.containsKey('w')) {
-    cameraY -= MAX_CAMERA_SPEED;
+    cameraY -= keysPressed.get('w');
     direction = Direction.UP;
     moving = true;
   } else if (keysPressed.containsKey('a')) {
-    cameraX -= MAX_CAMERA_SPEED;
+    cameraX -= keysPressed.get('a');
     direction = Direction.LEFT;
     moving = true;
   } else if (keysPressed.containsKey('s')) {
-    cameraY += MAX_CAMERA_SPEED;
+    cameraY += keysPressed.get('s');
     direction = Direction.DOWN;
     moving = true;
   } else if (keysPressed.containsKey('d')) {
-    cameraX += MAX_CAMERA_SPEED;
+    cameraX += keysPressed.get('d');
     direction = Direction.RIGHT;
     moving = true;
   }
