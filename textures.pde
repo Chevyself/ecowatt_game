@@ -1,4 +1,5 @@
 
+int GRID_SIZE = 128;
 // 16x16 tiles
 int TILE_SIZE = 16;
 
@@ -12,6 +13,9 @@ PImage tiles;
 HashMap<PVector, int[]> tilePixels = new HashMap<>();
 // Some extra textures
 HashMap<String, int[]> extras = new HashMap<>();
+
+// Texture metadata
+HashMap<String, TextureMetadata> textureMetadata = new HashMap<>();
 
 /** Returns the scaled pixels of the tile at the given position, based on the whole tiles image.
  *  Use #getTilePixels(int, int) to get the pixels of a tile at a specific position using cached values.
@@ -43,6 +47,7 @@ void reloadTextures() {
   extras.clear();
   computeTextures();
   loadExtraTextures();
+  textureMetadata = new TextureMetadataLoader().load(dataPath("metadata"));
 }
 
 void computeTextures() {
@@ -72,7 +77,6 @@ void loadExtraTextures() {
 
   // Player back left up, flips right
   extras.put("playerBackLeftUp", verticalFlip(playerBackRightUp()));
-  extras.put("playerFrontLeftUp", verticalFlip(playerFrontRightUp()));
 
   // Left mirror
   extras.put("playerLeft", verticalFlip(playerRight()));
@@ -169,7 +173,7 @@ int[] playerFront() {
 }
 
 int[] playerFrontLeftUp() {
-  return getExtraTexture("playerFrontLeftUp");
+  return getTilePixels(0, 7);
 }
 
 int[] playerRight() {

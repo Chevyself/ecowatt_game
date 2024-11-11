@@ -19,6 +19,9 @@ void setup() {
   tiles.loadPixels();
   reloadTextures();
   setupCamera();
+
+  // World
+  setupGrid();
 }
 
 void draw() {
@@ -26,7 +29,7 @@ void draw() {
   background(255);
 
   // -- Game logic --
-  grid.display();
+  renderGrid();
   keybindsFrame();
   drawCharacter();
 

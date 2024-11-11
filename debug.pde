@@ -1,3 +1,4 @@
+import java.util.concurrent.atomic.AtomicInteger;
 
 boolean debug = false;
 boolean showTextures = false;
@@ -5,9 +6,10 @@ boolean texturesShow = false;
 
 void renderDebug() {
   if (!debug) return;
-  grid.debugDisplay();
+  //grid.debugDisplay();
   fill(0);
   text("Camera: " + cameraX + ", " + cameraY, 5, 15);
+  text("FPS: " + frameRate, 5, 30);
   if (!showTextures) return;
   if (!texturesShow) {
     texturesShow = true;
@@ -39,26 +41,24 @@ void debugGrid() {
 
 /** Draws all the textures in the grid, also shows the name of the extra textures */
 void debugTextures() {
-  SimpleAtomic<Integer> tX = new SimpleAtomic<>(0);
-  SimpleAtomic<Integer> tY = new SimpleAtomic<>(0);
-
+  AtomicInteger tX = new AtomicInteger(0);
+  AtomicInteger tY = new AtomicInteger(0);
   tilePixels.forEach((position, pixels) -> {
     // drawInCell(tX.get(), tY.get(), pixels);
-    grid.getOrCreateCellData(tX.get(), tY.get()).texture = pixels;
-    tX.set(tX.get() + 1);
+    grid.getOrCreateCellData(tX.getAndIncrement(), tY.get(), new CellData()).setTexture(pixels);
     if (tX.get() >= width / GRID_SIZE) {
       tX.set(0);
-      tY.set(tY.get() + 1);
+      //tY.set(tY.get() + 1);
+      tY.incrementAndGet();
     }
   });
   extras.forEach((name, pixels) -> {
-    grid.getOrCreateCellData(tX.get(), tY.get()).texture = pixels;
+    grid.getOrCreateCellData(tX.get(), tY.get(), new CellData()).setTexture(pixels);
     fill(255, 0, 0);
-    text(name, tX.get() * GRID_SIZE + 5, tY.get() * GRID_SIZE + 15);
-    tX.set(tX.get() + 1);
+    text(name, tX.getAndIncrement() * GRID_SIZE + 5, tY.get() * GRID_SIZE + 15);
     if (tX.get() >= width / GRID_SIZE) {
       tX.set(0);
-      tY.set(tY.get() + 1);
+      tY.incrementAndGet();
     }
   });
 }
