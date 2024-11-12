@@ -35,6 +35,7 @@ void setup() {
   // Entities
   setupPlayer();
   setupHouse();
+  setupNecessities();
 }
 
 void draw() {
@@ -53,8 +54,8 @@ void draw() {
   if (modal == null || !modal.showModal) {
     renderGrid();
     drawCharacter();
-    renderNecessities();
     drawHouse();
+    renderNecessities();
   } else {
     modal.render();
   }

@@ -1,5 +1,8 @@
 import java.util.concurrent.atomic.AtomicInteger;
 
+int MAX_TURNED_ON_DISTANCE = 200;
+int MAX_DISTANCE_TO_TURN_ON = 180;
+
 // Furniture to buy
 ArrayList<Furniture> furnitureToBuy = new ArrayList<>();
 
@@ -10,14 +13,53 @@ int furnitureY = 0;
 
 Furniture placingFurniture;
 
+float kwHConsumed = 0;
+float kmHConsumedInEfficiently = 0;
+boolean isConsumingInEfficiently = false;
+int tickToChangeNecessities = 900; // 10 seconds
+
 // House controller
 void setupHouse() {
   fillFurnitureToBuy();
   setupHouseLayout();
 }
 
+/** Attempts to turn on furniture near the player */
+void turnOnFurniture() {
+  furniture.forEach(f -> {
+    if (!f.isOn && dist(playerX, playerY, f.x * GRID_SIZE, f.y * GRID_SIZE) < MAX_DISTANCE_TO_TURN_ON) {
+      f.isOn = true;
+      setOnTexture(f);
+    }
+  });
+}
+
+void turnOffFurniture() {
+  furniture.forEach(f -> {
+    if (f.isOn && dist(playerX, playerY, f.x * GRID_SIZE, f.y * GRID_SIZE) < MAX_DISTANCE_TO_TURN_ON) {
+      f.isOn = false;
+      setOffTexture(f);
+    }
+  });
+}
+
 void drawHouse() {
   drawPlacingFurniture();
+  // Increase per furniture
+  furniture.forEach(f -> {
+    if (f.isOn) {
+      kwHConsumed += f.consumption;
+      if (dist(playerX, playerY, f.x * GRID_SIZE, f.y * GRID_SIZE) > MAX_TURNED_ON_DISTANCE) {
+        isConsumingInEfficiently = true;
+        kmHConsumedInEfficiently += f.consumption;
+      } else {
+        if (currentFrame % tickToChangeNecessities == 0) {
+          println("Changing necessities!");
+          f.changeNecessitiesTick.run();
+        }
+      }
+    }
+  });
 }
 
 void drawPlacingFurniture() {
@@ -42,6 +84,11 @@ void movePlacingFurniture(int x, int y) {
 
 void attemptToPlaceFurniture() {
   if (placingFurniture == null) return;
+  if (placingFurniture.cost > money) {
+    playNoMoneySound();
+    return;
+  }
+  money -= placingFurniture.cost;
   // Check if it is accepted in the grid
   int x = (furnitureX + playerX) / GRID_SIZE;
   int y = (furnitureY + playerY) / GRID_SIZE; // We now have the middle of the furniture in a cell
@@ -56,18 +103,41 @@ void attemptToPlaceFurniture() {
     }
   }
 
-  // Add to cell data
-  for (int i = 0; i < placingFurniture.height; i++) {
-    for (int j = 0; j < placingFurniture.width; j++) {
-      CellData cellData = grid.getOrCreateCellData(x + j, y + i, new CellData());
-      PImage texture = getTextureAsImage(placingFurniture.offTextures[i][j]);
-      cellData.setTexture(texture , placingFurniture.layout);
-      cellData.isObstacle = true;
+  Furniture copy = placingFurniture.copy();
+  copy.x = x;
+  copy.y = y;
+  setOffTexture(copy);
+
+  furniture.add(copy);
+  resetPlacingFurniture();
+}
+
+private void setOffTexture(Furniture f) {
+  for (int i = 0; i < f.height; i++) {
+    for (int j = 0; j < f.width; j++) {
+      CellData cellData = grid.getCellData(f.x + j, f.y + i);
+      if (cellData != null) {
+        cellData.setTexture(getTextureAsImage(f.offTextures[i][j]), f.layout);
+      }
     }
   }
+}
 
-  furniture.add(placingFurniture.copy());
-  resetPlacingFurniture();
+private void setOnTexture(Furniture f) {
+  for (int i = 0; i < f.height; i++) {
+    for (int j = 0; j < f.width; j++) {
+      CellData cellData = grid.getCellData(f.x + j, f.y + i);
+      if (cellData != null) {
+        // cellData.setTexture(getTextureAsImage(f.onTextures[i][j]), f.layout);
+        Animation animation = animations.get(f.onTextures[i][j]);
+        if (animation != null) {
+          cellData.setAnimation(animation.frames, f.layout);
+        } else {
+          cellData.setTexture(getTextureAsImage(f.onTextures[i][j]), f.layout);
+        }
+      }
+    }
+  }
 }
 
 void setupHouseLayout() {
@@ -110,15 +180,115 @@ void setupHouseLayout() {
 }
 
 void fillFurnitureToBuy() {
+  Furniture ac = new Furniture(
+    "Aire acondicionado",
+    1,
+    2,
+    2,
+    new String[][] {{"ac", "acMirror"}},
+    new String[][] {{"acOn", "acOnMirror"}},
+    1000,
+    0.8
+  );
+  ac.changeNecessitiesTick = () -> {
+    decreaseNecessity("Comida");
+    increaseNecessity("Temperatura");
+    if (getNecessity("Temperatura") == 10) {
+      isConsumingInEfficiently = true;
+    }
+  };
+  Furniture bulb = new Furniture(
+    "Bombilla",
+    1,
+    1,
+    2,
+    new String[][] {{"bulb"}},
+    new String[][] {{"bulbOn"}},
+    100,
+    0.1
+  );
+  bulb.changeNecessitiesTick = () -> {
+    increaseNecessity("Temperatura");
+    decreaseNecessity("Comida");
+    if (getNecessity("Temperatura") == 10) {
+      isConsumingInEfficiently = true;
+    }
+  };
+  Furniture fridge = new Furniture(
+    "Nevera",
+    2,
+    1,
+    2,
+    new String[][] {{"fridge"},
+                    {"fridgeLower"}},
+    new String[][] {{"fridgeOn"},
+                    {"fridgeLowerOn"}},
+    1000,
+    0.6
+  );
+  fridge.changeNecessitiesTick = () -> {
+    increaseNecessity("Comida");
+    if (getNecessity("Comida") == 10) {
+      isConsumingInEfficiently = true;
+    }
+  };
+  Furniture mike = new Furniture(
+    "Microondas",
+    1,
+    1,
+    2,
+    new String[][] {{"mike"}},
+    new String[][] {{"mikeOn"}},
+    100,
+    0.2
+  );
+  mike.changeNecessitiesTick = () -> {
+    increaseNecessity("Comida");
+    decreaseNecessity("Diversion");
+    decreaseNecessity("Temperatura");
+    if (getNecessity("Comida") == 10) {
+      isConsumingInEfficiently = true;
+    }
+  };
+  Furniture pc = new Furniture(
+    "Computadora",
+    1,
+    2,
+    2,
+    new String[][] {{"pc", "pc2"}},
+    new String[][] {{"pcOn", "pc2On"}},
+    1000,
+    0.5
+  );
+  pc.changeNecessitiesTick = () -> {
+    increaseNecessity("Diversion");
+    decreaseNecessity("Comida");
+    if (getNecessity("Diversion") == 10) {
+      isConsumingInEfficiently = true;
+    }
+  };
   Furniture tv = new Furniture(
+    "Televisor",
     1,
     2,
     2,
     new String[][] {{"tv", "tvMirror"}},
-    new String[][] {{"tvOn"}},
-    1000
+    new String[][] {{"tvOn", "tvOnMirror"}},
+    1000,
+    0.4
   );
+  tv.changeNecessitiesTick = () -> {
+    increaseNecessity("Diversion");
+    if (getNecessity("Diversion") == 10) {
+      isConsumingInEfficiently = true;
+    }
+  };
 
+  furnitureToBuy.add(ac);
+  furnitureToBuy.add(bulb);
+  furnitureToBuy.add(fridge);
+  furnitureToBuy.add(mike);
+  furnitureToBuy.add(pc);
   furnitureToBuy.add(tv);
 }
 
@@ -128,7 +298,7 @@ void openShop() {
   }
   modal = new Modal();
   modal.postRender = () -> {
-    text("Shop", width / 2, height * 0.17);
+    text("Tienda", width / 2, height * 0.17);
   };
   modal.setupModal(() -> {
     addFurnitureToShop();
@@ -148,7 +318,7 @@ void addFurnitureToShop() {
       x.set(-5);
       y.getAndAdd(2);
     }
-    modal.addButton(x.getAndAdd(2), y.get(), "f.name", () -> {
+    modal.addButton(x.getAndAdd(2), y.get(), f.name, () -> {
       placingFurniture = f;
       modal.closeModal();
     });

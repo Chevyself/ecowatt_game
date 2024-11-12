@@ -174,6 +174,7 @@ class Modal {
   }
 
   void selectButton() {
+    playClickSound();
     ModalElement cell = modalGrid.getCellData(selectedX, selectedY);
     if (cell == null) {
       return;

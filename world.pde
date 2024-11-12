@@ -12,22 +12,43 @@ Grid<CellData> grid;
 /** Max amount of layers per cell data in the grid */
 int MAX_LAYERS = 3;
 
-class CellData {
+class CellData implements ICellData {
   // CellData may have layers of textures
   // Layer 0 being reserved for walls, grass or any base
   // Layer 1 being reserved for objects that must be exactly above the floor or base. ie trees, furniture
   // Layer 2 being reserved for objects that must be exactly above the objects in layer 1. ie. a bird on top of a tree or
   // a computer on top of a desk
-  PImage[] textureImages = new PImage[MAX_LAYERS];
+  // PImage[] textureImages = new PImage[MAX_LAYERS];
+  PImage[][] textureImages = new PImage[MAX_LAYERS][]; // To support animations
   /** Whether this cell blocks the player's movement */
   boolean isObstacle = false;
+  int maxAnimationFrameHold = 5;
+  int currentAnimationFrame = 0;
+  int currentAnimationFrameHold = 0;
 
   void setTexture(int[] texture, int layer) {
-    this.textureImages[layer] = pixelsToImage(texture);
+    // this.textureImages[layer] = new PImage[1]{pixelsToImage(texture)};
+    setTexture(pixelsToImage(texture), layer);
   }
 
   void setTexture(PImage texture, int layer) {
-    this.textureImages[layer] = texture;
+    this.textureImages[layer] = new PImage[]{texture};
+  }
+
+  void setAnimation(int[][] textures, int layer) {
+    this.textureImages[layer] = new PImage[textures.length];
+    for (int i = 0; i < textures.length; i++) {
+      this.textureImages[layer][i] = pixelsToImage(textures[i]);
+    }
+  }
+
+  void setAnimation(PImage[] textures, int layer) {
+    this.textureImages[layer] = textures;
+  }
+
+  @Override
+  boolean isObstacle() {
+    return isObstacle;
   }
 }
 
@@ -75,7 +96,20 @@ void renderGrid() {
 
 void drawCellTexture(CellData cell, float screenX, float screenY) {
   for (int i = 0; i < cell.textureImages.length; i++) {
-    drawTextureInCell(cell, screenX, screenY, cell.textureImages[i]);
+    // drawTextureInCell(cell, screenX, screenY, cell.textureImages[i]);
+    if (cell.textureImages[i] != null) {
+      if (cell.textureImages[i].length > 1) {
+        if (cell.currentAnimationFrameHold == 0) {
+          cell.currentAnimationFrame = (cell.currentAnimationFrame + 1) % cell.textureImages[i].length;
+          cell.currentAnimationFrameHold = cell.maxAnimationFrameHold;
+        } else {
+          cell.currentAnimationFrameHold--;
+        }
+        drawTextureInCell(cell, screenX, screenY, cell.textureImages[i][cell.currentAnimationFrame]);
+      } else {
+        drawTextureInCell(cell, screenX, screenY, cell.textureImages[i][0]);
+      }
+    }
   }
 }
 
@@ -123,74 +157,7 @@ void debugGrid() {
   }
 }
 
-/** Checks if the player hitbox will not collide with any obstacle in the grid */
+/** Checks if the player hitbox will collide with any obstacle in the grid */
 boolean checkPlayerCollision(int nextPlayerX, int nextPlayerY) {
-  // Calculate the hitbox boundaries based on the player's position
-  int playerMinX = nextPlayerX - GRID_SIZE / 2;
-  int playerMaxX = nextPlayerX + GRID_SIZE / 2;
-  int playerMinY = nextPlayerY - GRID_SIZE / 2;
-  int playerMaxY = nextPlayerY + GRID_SIZE / 2;
-
-  // Loop through all grid positions the player might occupy
-  for (int x = playerMinX; x <= playerMaxX; x += GRID_SIZE) {
-    for (int y = playerMinY; y <= playerMaxY; y += GRID_SIZE) {
-      // Get the grid coordinates by dividing by GRID_SIZE (to map to grid indices)
-      int gridX = x / GRID_SIZE;
-      int gridY = y / GRID_SIZE;
-
-      // Ensure the grid coordinates are valid
-      CellData cell = grid.getCellData(gridX, gridY);
-      if (cell != null && cell.isObstacle) {
-        return false; // Collision detected
-      }
-    }
-  }
-  return true; // No collision
+  return grid.isValidPositionWithDistance(nextPlayerX, nextPlayerY, GRID_SIZE / 2, 1);
 }
-
-/**
-  * Checks the amount of distance a player can move based on collisions
-  * If there's no collision changes will be returned as is
-  * If there's a collision, the changes will be adjusted to the maximum possible distance or
-  * 0 if the player can't move at all
-  * Annotated method works but it does not return the changes
-int[] checkPlayerCollision(int changeX, int changeY) {
-  // Calculate the hitbox boundaries based on the player's position
-  int playerMinX = playerX - GRID_SIZE / 2;
-  int playerMaxX = playerX + GRID_SIZE / 2;
-  int playerMinY = playerY - GRID_SIZE / 2;
-  int playerMaxY = playerY + GRID_SIZE / 2;
-
-  // Loop through all grid positions the player might occupy
-  for (int x = playerMinX; x <= playerMaxX; x += GRID_SIZE) {
-    for (int y = playerMinY; y <= playerMaxY; y += GRID_SIZE) {
-      // Get the grid coordinates by dividing by GRID_SIZE (to map to grid indices)
-      int gridX = x / GRID_SIZE;
-      int gridY = y / GRID_SIZE;
-
-      // Ensure the grid coordinates are valid
-      CellData cell = grid.getCellData(gridX, gridY);
-      if (cell != null && cell.isObstacle) {
-        // Collision detected
-        // Calculate the maximum distance the player can move
-        // Distance until the player hits the obstacle
-        int distanceX = 0;
-        int distanceY = 0;
-        if (changeX > 0) {
-          distanceX = x - playerMaxX;
-        } else if (changeX < 0) {
-          distanceX = playerMinX - x - GRID_SIZE;
-        }
-        if (changeY > 0) {
-          distanceY = y - playerMaxY;
-        } else if (changeY < 0) {
-          distanceY = playerMinY - y - GRID_SIZE;
-        }
-        return new int[] {distanceX, distanceY};
-      }
-    }
-  }
-  return new int[] {changeX, changeY};
-}
-*/
-

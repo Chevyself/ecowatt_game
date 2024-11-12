@@ -5,8 +5,8 @@ int MAX_ANIMATION_FRAME = 5; // Keep the animation for at least 5 frames
 
 // Basically, the camera, is how far we've gone from
 // the origin
-int playerX = 0;
-int playerY = 0;
+int playerX = 640;
+int playerY = 1408;
 
 // Modal the player might be seeing
 Modal modal;

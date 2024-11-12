@@ -16,6 +16,7 @@ void keyPressed() {
 }
 
 void keyPressed(char key) {
+  keysPressed.put(key, true);
   switch (key) {
     case '4':
       debug = !debug;
@@ -47,10 +48,47 @@ void keyPressed(char key) {
       }
       openPause();
       break;
+    case 'v':
+      if (modal == null || !modal.showModal) {
+        // Turn on furniture nearby
+        turnOnFurniture();
+      }
+      break;
+    case 'x':
+      if (modal == null || !modal.showModal) {
+        // Turn off furniture nearby
+        turnOffFurniture();
+      }
+      break;
     default:
-      keysPressed.put(key, true);
       break;
   }
+}
+
+void openScore() {
+  if (modal != null && modal.showModal) {
+    modal.closeModal();
+    modal = null;
+  }
+  modal = new Modal();
+  modal.nextAllowedPress = millis() + 200;
+  modal.postRender = () -> {
+    textAlign(CENTER, CENTER);
+    textSize(32);
+    text("Puntaje", width / 2, height * 0.2);
+    text("kwH Consumido: " + nf(kwHConsumed, 1, 2), width / 2, height * 0.3);
+    text("kwH Consumido Ineficientemente: " + nf(kmHConsumedInEfficiently, 1, 2), width / 2, height * 0.4);
+    text("Dinero: " + nf(money, 1, 2), width / 2, height * 0.5);
+    textAlign(LEFT, BASELINE);
+  };
+
+  modal.setupModal(() -> {
+    modal.addButton(0, 2, "Cerrar", () -> {
+      modal.closeModal();
+      modal = null;
+    });
+    modal.openModal();
+  });
 }
 
 void openPause() {
@@ -60,7 +98,7 @@ void openPause() {
   modal = new Modal();
   modal.setupModal(() -> {
     modal.addButton(-2, 0, "Puntaje", () -> {
-      // TODO: Show score
+      openScore();
     });
     modal.addButton(0, 0, "Continuar", () -> {
       modal.closeModal();
