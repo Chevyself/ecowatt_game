@@ -4,86 +4,62 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 // Camera is declared in camera.pde
 // vars:
-//  cameraX
-//  cameraY
+//  playerX
+//  playerY
 
 Grid<CellData> grid;
 
+/** Max amount of layers per cell data in the grid */
 int MAX_LAYERS = 3;
 
 class CellData {
-  //int[] texture;
-  //PImage textureImage;
   // CellData may have layers of textures
   // Layer 0 being reserved for walls, grass or any base
   // Layer 1 being reserved for objects that must be exactly above the floor or base. ie trees, furniture
   // Layer 2 being reserved for objects that must be exactly above the objects in layer 1. ie. a bird on top of a tree or
   // a computer on top of a desk
-  int[][] textures = new int[MAX_LAYERS][];
   PImage[] textureImages = new PImage[MAX_LAYERS];
   /** Whether this cell blocks the player's movement */
   boolean isObstacle = false;
 
-  /*
-  void setTexture(int[] texture) {
-    this.texture = texture;
-    this.textureImage = createImage(GRID_SIZE, GRID_SIZE, RGB);
-    this.textureImage.loadPixels();
-    for (int i = 0; i < texture.length; i++) {
-      this.textureImage.pixels[i] = texture[i];
-    }
-    this.textureImage.updatePixels();
-  }*/
   void setTexture(int[] texture, int layer) {
-    this.textures[layer] = texture;
     this.textureImages[layer] = pixelsToImage(texture);
+  }
+
+  void setTexture(PImage texture, int layer) {
+    this.textureImages[layer] = texture;
   }
 }
 
 void setupGrid() {
   grid = new Grid<CellData>(GRID_SIZE);
-  /*
-  for (int i = -100; i < 100; i++) {
-    for (int j = -100; j < 100; j++) {
-      grid.getOrCreateCellData(i, j, new CellData()).setTexture(grass());
-    }
-  }*/
+
+  // Fill with something
+  growGrass();
 }
 
-/*
-void renderGrid() {
-  float startX = cameraX - width/2;
-  float startY = cameraY - height/2;
-  float endX = cameraX + width/2;
-  float endY = cameraY + height/2;
-  AtomicBoolean drawCharacter = new AtomicBoolean(true);
-  grid.loopThrough(
-    cameraX,
-    cameraY,
-    width,
-    height,
-    startX,
-    startY,
-    endX,
-    endY,
-    false,
-    (x, y, cell) -> {
-      boolean draw = drawCellTexture(cell, x, y, drawCharacter.get());
-      drawCharacter.set(draw);
-    });
-}*/
+/** Fills a big area with grass */
+void growGrass() {
+  int[] grassTexture = getTexture("grass");
+  println("grassTexture: " + grassTexture.length);
+  for (int i = -100; i < 100; i++) {
+    for (int j = -100; j < 100; j++) {
+      grid.getOrCreateCellData(i, j, new CellData()).setTexture(grassTexture, 0);
+    }
+  }
+}
 
 void renderGrid() {
   // Render each layer in order
-  float startX = cameraX - width/2;
-  float startY = cameraY - height/2;
-  float endX = cameraX + width/2;
-  float endY = cameraY + height/2;
+  float startX = playerX - width/2;
+  float startY = playerY - height/2;
+  float endX = playerX + width/2;
+  float endY = playerY + height/2;
   for (int layer = 0; layer < MAX_LAYERS; layer++) {
     AtomicBoolean drawCharacter = new AtomicBoolean(true);
     grid.loopThrough(
-      cameraX,
-      cameraY,
+      playerX,
+      playerY,
       width,
       height,
       startX,
@@ -99,23 +75,24 @@ void renderGrid() {
 
 void drawCellTexture(CellData cell, float screenX, float screenY) {
   for (int i = 0; i < cell.textureImages.length; i++) {
-
-    if (cell.textureImages[i] == null || cell.textures[i] == null || cell.textures[i].length <= 0) {
-      continue;
-    }
-    noStroke();
-    image(cell.textureImages[i], screenX, screenY);
+    drawTextureInCell(cell, screenX, screenY, cell.textureImages[i]);
   }
+}
 
-  // return drawCharacter;
+void drawTextureInCell(CellData cell, float screenX, float screenY, PImage texture) {
+  if (texture == null) {
+    return;
+  }
+  noStroke();
+  image(texture, screenX, screenY);
 }
 
 void debugGrid() {
   // Calculate grid boundaries based on screen size
-  float startX = cameraX - width/2;
-  float startY = cameraY - height/2;
-  float endX = cameraX + width/2;
-  float endY = cameraY + height/2;
+  float startX = playerX - width/2;
+  float startY = playerY - height/2;
+  float endX = playerX + width/2;
+  float endY = playerY + height/2;
 
   // Align to grid
   float alignedStartX = floor(startX/GRID_SIZE) * GRID_SIZE;
@@ -126,21 +103,21 @@ void debugGrid() {
 
   // Draw vertical lines
   for (float x = alignedStartX; x <= endX; x += GRID_SIZE) {
-    float screenX = x - cameraX + width/2;
+    float screenX = x - playerX + width/2;
     line(screenX, 0, screenX, height);
   }
 
   // Draw horizontal lines
   for (float y = alignedStartY; y <= endY; y += GRID_SIZE) {
-    float screenY = y - cameraY + height/2;
+    float screenY = y - playerY + height/2;
     line(0, screenY, width, screenY);
   }
 
   // Draw the coordinates of each cell
   for (float x = alignedStartX; x <= endX; x += GRID_SIZE) {
     for (float y = alignedStartY; y <= endY; y += GRID_SIZE) {
-      float screenX = x - cameraX + width/2;
-      float screenY = y - cameraY + height/2;
+      float screenX = x - playerX + width/2;
+      float screenY = y - playerY + height/2;
       fill(0);
       text(floor(x/GRID_SIZE) + ", " + floor(y/GRID_SIZE), screenX + 5, screenY + 15); }
   }
@@ -179,10 +156,10 @@ boolean checkPlayerCollision(int nextPlayerX, int nextPlayerY) {
   * Annotated method works but it does not return the changes
 int[] checkPlayerCollision(int changeX, int changeY) {
   // Calculate the hitbox boundaries based on the player's position
-  int playerMinX = cameraX - GRID_SIZE / 2;
-  int playerMaxX = cameraX + GRID_SIZE / 2;
-  int playerMinY = cameraY - GRID_SIZE / 2;
-  int playerMaxY = cameraY + GRID_SIZE / 2;
+  int playerMinX = playerX - GRID_SIZE / 2;
+  int playerMaxX = playerX + GRID_SIZE / 2;
+  int playerMinY = playerY - GRID_SIZE / 2;
+  int playerMaxY = playerY + GRID_SIZE / 2;
 
   // Loop through all grid positions the player might occupy
   for (int x = playerMinX; x <= playerMaxX; x += GRID_SIZE) {

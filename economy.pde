@@ -1,0 +1,1 @@
+int money = 0;

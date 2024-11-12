@@ -40,6 +40,10 @@ public class TextureMetadataLoader {
 
   private void readMetadata(String path) {
     File metadataDir = new File(path);
+    readMetadata(metadataDir);
+  }
+
+  private void readMetadata(File metadataDir) {
     if (!metadataDir.exists() || !metadataDir.isDirectory()) {
       System.err.println("Metadata directory not found. at: " + metadataDir.getAbsolutePath());
       return;
@@ -59,6 +63,9 @@ public class TextureMetadataLoader {
             metadata.put(key, textureMetadata);
           }
         });
+      }
+      if (file.isDirectory()) {
+        readMetadata(file);
       }
     }
   }

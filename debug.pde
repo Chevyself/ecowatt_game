@@ -8,9 +8,9 @@ void renderDebug() {
   if (!debug) return;
   debugGrid();
   fill(0);
-  text("Camera: " + cameraX + ", " + cameraY, 5, 15);
+  text("Camera: " + playerX + ", " + playerY, 5, 15);
   text("FPS: " + frameRate, 5, 30);
-  text("Grid: " + (cameraX / GRID_SIZE) + ", " + (cameraY / GRID_SIZE), 5, 45);
+  text("Grid: " + (playerX / GRID_SIZE) + ", " + (playerY / GRID_SIZE), 5, 45);
   if (!showTextures) return;
   if (!texturesShow) {
     texturesShow = true;

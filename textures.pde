@@ -1,13 +1,16 @@
-
+// Grid for the world
 int GRID_SIZE = 128;
 // 16x16 tiles
 int TILE_SIZE = 16;
 
-// Scale factor
+// Scale factor for texture to match the grid
 float SCALE = (float) GRID_SIZE / TILE_SIZE;
 
 // Load tiles image
 PImage tiles;
+
+// Load font
+PFont font;
 
 // Texture metadata
 HashMap<String, TextureMetadata> textureMetadata = new HashMap<>();
@@ -59,10 +62,27 @@ int[] computeTilePixels(int x, int y) {
 
 /** Reloads all the possible textures and scale them by calculating the cell size using GRID_SIZE */
 void reloadTextures() {
+  // Font
+  font = loadFont("Minecraft-32.vlw");
+  textFont(font, 32);
+
+  // Tiles/Atlas
+  tiles = loadImage("tiles.png");
+  tiles.loadPixels();
+
+  // Understand atlas
   computeTextures();
+
+  // Capture texture information
   textureMetadata = new TextureMetadataLoader().load(dataPath("metadata"));
+
+  // Fallback to know if a texture is not loaded/missing
   fallback = getTilePixels(0, 0);
+
+  // Convert the metadata to usable textures
   metadataToTextures();
+
+  // Call listeners
   reloadTextureListeners.forEach(Runnable::run);
 }
 
@@ -244,4 +264,24 @@ PImage[] framesToImages(int[][] frames) {
     images[i] = pixelsToImage(frames[i]);
   }
   return images;
+}
+
+PImage buildTexture(PImage[][] textures, int height, int width) {
+  // Swap width and height calculation to match desired layout
+  PImage texture = createImage(GRID_SIZE * width, GRID_SIZE * height, ARGB);
+  texture.loadPixels();
+  for (int i = 0; i < height; i++) {
+    for (int j = 0; j < width; j++) {
+      PImage img = textures[i][j];
+      for (int x = 0; x < GRID_SIZE; x++) {
+        for (int y = 0; y < GRID_SIZE; y++) {
+          int destX = j * GRID_SIZE + x;
+          int destY = i * GRID_SIZE + y;
+          texture.pixels[destX + destY * texture.width] = img.pixels[x + y * GRID_SIZE];
+        }
+      }
+    }
+  }
+  texture.updatePixels();
+  return texture;
 }

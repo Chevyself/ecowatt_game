@@ -36,8 +36,8 @@ public class Grid<T> {
   }
 
   public void loopThrough(
-      int cameraX,
-      int cameraY,
+      int playerX,
+      int playerY,
       int width,
       int height,
       float startX,
@@ -62,8 +62,8 @@ public class Grid<T> {
         if (t == null) {
           continue;
         }
-        float screenX = x - cameraX + width / 2f;
-        float screenY = y - cameraY + height / 2f;
+        float screenX = x - playerX + width / 2f;
+        float screenY = y - playerY + height / 2f;
         consumer.accept(screenX, screenY, t);
       }
     }

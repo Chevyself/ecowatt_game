@@ -5,20 +5,13 @@ int MAX_ANIMATION_FRAME = 5; // Keep the animation for at least 5 frames
 
 // Basically, the camera, is how far we've gone from
 // the origin
-int cameraX = -240;
-int cameraY = -240;
+int playerX = 0;
+int playerY = 0;
+
+// Modal the player might be seeing
+Modal modal;
 
 // Textures
-/*
-int[] playerBackIdle = new int[0];
-int[] playerFrontIdle = new int[0];
-int[] playerRight = new int[0];
-int[] playerLeft = new int[0];
-int[][] playerBackFrames = new int[0][0];
-int[][] playerFrontFrames = new int[0][0];
-int[][] playerRightFrames = new int[0][0];
-int[][] playerLeftFrames = new int[0][0];
-*/
 PImage playerBackIdle;
 PImage playerFrontIdle;
 PImage playerRight;
@@ -35,12 +28,14 @@ PImage lastTexture;
 int animationFrame = 0;
 int currentTextureFrame = 0;
 
-void setupCamera() {
+void setupPlayer() {
+  // Last texture will be the idle texture when setting up
   lastTexture = getIdleTexture();
+
+  // Load the player textures
   loadPlayerTextures();
-  reloadTextureListeners.add(() -> {
-    loadPlayerTextures();
-  });
+  // When reloaded, reload the player textures
+  reloadTextureListeners.add(() -> loadPlayerTextures());
 }
 
 void loadPlayerTextures() {

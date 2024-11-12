@@ -13,13 +13,13 @@ HashMap<Integer, Character> buttonMapping = new HashMap<>();
 char analogButton = 'b';
 
 // Distance
-int currentDistance = Integer.MAX_VALUE;
+int currentDistance = Integer.MIN_VALUE;
 
 void setupSerialCommunication() {
   // List all the available serial ports
   println(Serial.list());
   // Open the port
-  serial = new Serial(this, Serial.list()[4], 9600);
+  serial = new Serial(this, Serial.list()[0], 9600);
 
   // Init mappings
   buttonMapping.put(0, 'z');
@@ -77,26 +77,26 @@ void processFullLBuffer(String str) {
   int yMapped = (int) map(analogY, 0, 1023, -MAX_CAMERA_SPEED, MAX_CAMERA_SPEED);
   // Basically x is up and down so > 0 is up else down
   if (xMapped == 0) {
-    keysPressed.remove('w');
-    keysPressed.remove('s');
+    movementKeys.remove('w');
+    movementKeys.remove('s');
     checkIsMoving();
   } else {
     if (xMapped > 0) {
-       keysPressed.put('w', xMapped);
+      movementKeys.put('w', xMapped);
     } else {
-      keysPressed.put('s', -xMapped);
+      movementKeys.put('s', -xMapped);
     }
   }
   // For y < 0 is left else right
   if (yMapped == 0) {
-    keysPressed.remove('a');
-    keysPressed.remove('d');
+    movementKeys.remove('a');
+    movementKeys.remove('d');
     checkIsMoving();
   } else {
     if (yMapped < 0) {
-      keysPressed.put('a', -yMapped);
+      movementKeys.put('a', -yMapped);
     } else {
-      keysPressed.put('d', yMapped);
+      movementKeys.put('d', yMapped);
     }
   }
 
