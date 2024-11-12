@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Properties;
@@ -24,6 +25,7 @@ import java.util.Properties;
  *   <li>animationStart: Animation when the object is starting</li>
  *   <li>animationEnd: Animation when the object is ending</li>
  *   Prefix rule does not apply to the following fields:
+ *   <li>animationMirror: whether the animation should be the mirror of the declared frames</li>
  *   <li>animationSpeed: Speed of the animation (measurement to be defined)</li>
  * </ul>
  * <ul>
@@ -78,27 +80,29 @@ public class TextureMetadataLoader {
     int x = Integer.parseInt(properties.getProperty("x"));
     int y = Integer.parseInt(properties.getProperty("y"));
     int rotations = Integer.parseInt(properties.getProperty("rotations", "0"));
-    boolean completeWithMirror = Boolean.parseBoolean(properties.getProperty("completeWithMirror", "false"));
-    int[] animationOn = parseAnimation(properties.getProperty("animationOn"));
-    int[] animationOff = parseAnimation(properties.getProperty("animationOff"));
-    int[] animationStart = parseAnimation(properties.getProperty("animationStart"));
-    int[] animationEnd = parseAnimation(properties.getProperty("animationEnd"));
+    boolean mirror = Boolean.parseBoolean(properties.getProperty("mirror", "false"));
+    ArrayList<Vector2> animationOn = parseAnimation(properties.getProperty("animationOn"));
+    ArrayList<Vector2> animationOff = parseAnimation(properties.getProperty("animationOff"));
+    ArrayList<Vector2> animationStart = parseAnimation(properties.getProperty("animationStart"));
+    ArrayList<Vector2> animationEnd = parseAnimation(properties.getProperty("animationEnd"));
+    boolean animationMirror = Boolean.parseBoolean(properties.getProperty("animationMirror", "false"));
     int animationSpeed = Integer.parseInt(properties.getProperty("animationSpeed", "0"));
-    return new TextureMetadata(key, x, y, rotations, completeWithMirror, animationOn, animationOff, animationStart, animationEnd, animationSpeed);
+    return new TextureMetadata(key, x, y, rotations, mirror, animationOn, animationOff, animationStart, animationEnd, animationMirror, animationSpeed);
   }
 
-  private int[] parseAnimation(String animation) {
+  private ArrayList<Vector2> parseAnimation(String animation) {
     if (animation == null) {
-      return new int[0];
+      return new ArrayList<>();
     }
     String[] frames = animation.split(";");
-    int[] result = new int[frames.length * 2];
-    for (int i = 0; i < frames.length; i++) {
-      String[] coordinates = frames[i].split(",");
-      result[i * 2] = Integer.parseInt(coordinates[0]);
-      result[i * 2 + 1] = Integer.parseInt(coordinates[1]);
+    ArrayList<Vector2> animationFrames = new ArrayList<>();
+    for (String frame : frames) {
+      String[] coordinates = frame.split(",");
+      int x = Integer.parseInt(coordinates[0]);
+      int y = Integer.parseInt(coordinates[1]);
+      animationFrames.add(new Vector2(x, y));
     }
-    return result;
+    return animationFrames;
   }
 
   public HashMap<String, TextureMetadata> load(String path) {

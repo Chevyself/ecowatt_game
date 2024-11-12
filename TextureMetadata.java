@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /**
  * Loaded texture metadata.
  * <p>
@@ -19,7 +21,7 @@
  *   <li>animationSpeed: Speed of the animation (measurement to be defined)</li>
  * </ul>
  * <ul>
- *   <li>completeWithMirror: If true the texture should be mirrored on the x-axis</li>
+ *   <li>mirror: whether the texture should be mirrored</li>
  *   <li>rotations: number of times the texture should be rotated 90 degrees clockwise</li>
  * </ul>
  */
@@ -29,23 +31,25 @@ public class TextureMetadata {
   private final int x;
   private final int y;
   private final int rotations;
-  private final boolean completeWithMirror;
-  private final int[] animationOn;
-  private final int[] animationOff;
-  private final int[] animationStart;
-  private final int[] animationEnd;
+  private final boolean mirror;
+  private final ArrayList<Vector2> animationOn;
+  private final ArrayList<Vector2> animationOff;
+  private final ArrayList<Vector2> animationStart;
+  private final ArrayList<Vector2> animationEnd;
+  private final boolean animationMirror;
   private final int animationSpeed;
 
-  public TextureMetadata(String key, int x, int y, int rotations, boolean completeWithMirror, int[] animationOn, int[] animationOff, int[] animationStart, int[] animationEnd, int animationSpeed) {
+  public TextureMetadata(String key, int x, int y, int rotations, boolean mirror, ArrayList<Vector2> animationOn, ArrayList<Vector2> animationOff, ArrayList<Vector2> animationStart, ArrayList<Vector2> animationEnd, boolean animationMirror, int animationSpeed) {
     this.key = key;
     this.x = x;
     this.y = y;
     this.rotations = rotations;
-    this.completeWithMirror = completeWithMirror;
+    this.mirror = mirror;
     this.animationOn = animationOn;
     this.animationOff = animationOff;
     this.animationStart = animationStart;
     this.animationEnd = animationEnd;
+    this.animationMirror = animationMirror;
     this.animationSpeed = animationSpeed;
   }
 
@@ -65,24 +69,28 @@ public class TextureMetadata {
     return rotations;
   }
 
-  public boolean isCompleteWithMirror() {
-    return completeWithMirror;
+  public boolean isMirror() {
+    return mirror;
   }
 
-  public int[] getAnimationOn() {
+  public ArrayList<Vector2> getAnimationOn() {
     return animationOn;
   }
 
-  public int[] getAnimationOff() {
+  public ArrayList<Vector2> getAnimationOff() {
     return animationOff;
   }
 
-  public int[] getAnimationStart() {
+  public ArrayList<Vector2> getAnimationStart() {
     return animationStart;
   }
 
-  public int[] getAnimationEnd() {
+  public ArrayList<Vector2> getAnimationEnd() {
     return animationEnd;
+  }
+
+  public boolean isAnimationMirror() {
+    return animationMirror;
   }
 
   public int getAnimationSpeed() {

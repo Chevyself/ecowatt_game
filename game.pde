@@ -14,14 +14,15 @@ void setup() {
   // Setup serial
   setupSerialCommunication();
 
+  // World
+  setupGrid();
+
   // Textures
   tiles = loadImage("tiles.png");
   tiles.loadPixels();
   reloadTextures();
   setupCamera();
-
-  // World
-  setupGrid();
+  setupHouse();
 }
 
 void draw() {

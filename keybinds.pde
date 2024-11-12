@@ -67,21 +67,34 @@ void keybindsFrame() {
     moving = true;
     return;
   }*/
+  int xChange = 0;
+  int yChange = 0;
   if (keysPressed.containsKey('w')) {
-    cameraY -= keysPressed.get('w');
+    // cameraY -= keysPressed.get('w');
+    yChange -= keysPressed.get('w');
     direction = Direction.UP;
     moving = true;
   } else if (keysPressed.containsKey('a')) {
-    cameraX -= keysPressed.get('a');
+    // cameraX -= keysPressed.get('a');
+    xChange -= keysPressed.get('a');
     direction = Direction.LEFT;
     moving = true;
   } else if (keysPressed.containsKey('s')) {
-    cameraY += keysPressed.get('s');
+    // cameraY += keysPressed.get('s');
+    yChange += keysPressed.get('s');
     direction = Direction.DOWN;
     moving = true;
   } else if (keysPressed.containsKey('d')) {
-    cameraX += keysPressed.get('d');
+    // cameraX += keysPressed.get('d');
+    xChange += keysPressed.get('d');
     direction = Direction.RIGHT;
     moving = true;
+  }
+  int nextX = cameraX + xChange;
+  int nextY = cameraY + yChange;
+  boolean notCollides = checkPlayerCollision(nextX, nextY);
+  if (notCollides) {
+   cameraX = nextX;
+   cameraY = nextY;
   }
 }
